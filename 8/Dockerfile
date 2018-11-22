@@ -7,6 +7,12 @@ ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
 RUN set -xe \
     && apk --update add \
+            freetype \
+            libpng \
+            libjpeg-turbo \
+            freetype-dev \
+            libpng-dev \
+            libjpeg-turbo-dev \
             build-base \
             libpq \
             mysql-client \
@@ -15,8 +21,15 @@ RUN set -xe \
             php7-pear \
             patch \
             tar && \
+            docker-php-ext-configure gd \
+                --with-gd \
+                --with-freetype-dir=/usr/include/ \
+                --with-png-dir=/usr/include/ \
+                --with-jpeg-dir=/usr/include/ && \
+            NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) && \
+            docker-php-ext-install -j${NPROC} gd && \
             docker-php-ext-install mysqli pgsql pdo_mysql pdo_pgsql && \
-            apk del build-base postgresql-dev && \
+            apk del build-base postgresql-dev freetype-dev libpng-dev libjpeg-turbo-dev && \
             rm -rf /var/cache/apk/* \
     # Install memcache extension
     && apk add --no-cache --update libmemcached-libs zlib \
