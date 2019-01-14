@@ -2,7 +2,9 @@ FROM php:7.1-alpine
 
 LABEL maintainer="jason@ciandt.com"
 
-ENV DRUSH_VERSION 8.1.16
+ENV DRUSH_VERSION 8.1.18
+ENV DRUSH_LAUNCHER_VERSION 0.6.0
+ENV DRUSH_LAUNCHER_FALLBACK "/usr/local/drush/drush"
 ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
 RUN set -xe \
@@ -41,8 +43,10 @@ RUN set -xe \
     && rm -rf /tmp/* \
     && apk del .memcached-deps .phpize-deps \
     # Install Drush.
-    && curl -fsSL -o /usr/local/bin/drush "https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar" \
-    && chmod +x /usr/local/bin/drush \ 
+    && mkdir -p /usr/local/drush \
+    && curl -fsSL -o /usr/local/drush/drush "https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar" \
+    && curl -fsSL -o /usr/local/bin/drush https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar \    
+    && chmod +x /usr/local/drush/drush /usr/local/bin/drush \
     && drush --version
 
 # Update the entry point for drush
